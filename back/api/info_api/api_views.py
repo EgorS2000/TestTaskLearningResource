@@ -48,7 +48,7 @@ class Tasks(ListAPIView):
                     all_quizzes_list = Quiz.objects.all()
                 except AttributeError:
                     return Response(data={
-                        'data': "There are no such tasks"
+                        'message': "There are no such tasks"
                     },
                         status=status.HTTP_400_BAD_REQUEST
                     )
@@ -98,7 +98,7 @@ class Tasks(ListAPIView):
                     all_tests_list = Test.objects.all()
                 except AttributeError:
                     return Response(data={
-                        'data': "There are no such tasks"
+                        'message': "There are no such tasks"
                     },
                         status=status.HTTP_400_BAD_REQUEST
                     )
@@ -154,7 +154,7 @@ class Tasks(ListAPIView):
                     all_homeworks_list = Homework.objects.all()
                 except AttributeError:
                     return Response(data={
-                        'data': "There are no such tasks"
+                        'message': "There are no such tasks"
                     },
                         status=status.HTTP_400_BAD_REQUEST
                     )
@@ -189,7 +189,7 @@ class Tasks(ListAPIView):
                     all_homeworks_list = HomeworkAnswer.objects.all()
                 except AttributeError:
                     return Response(data={
-                        'data': "There are no such tasks"
+                        'message': "There are no such tasks"
                     },
                         status=status.HTTP_400_BAD_REQUEST
                     )

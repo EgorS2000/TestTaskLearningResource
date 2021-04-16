@@ -15,7 +15,7 @@ class CreateTestTests(APITestCase):
         self.token = Token.objects.create(user=self.user)
         data = {
             "name": "Summary",
-            "deadline": "15/04/2021 23:50:00",
+            "deadline": "16/04/2021 23:50:00",
             "sphere": "IT",
             "questions":
                 {

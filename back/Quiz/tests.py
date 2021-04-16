@@ -44,7 +44,7 @@ class CreateQuizTests(APITestCase):
         }
 
         response = self.client.post(
-            reverse('create_quiz'),
+            reverse('give_quiz_answer'),
             data=data,
             HTTP_AUTHORIZATION=f'Token {self.token}'
         )

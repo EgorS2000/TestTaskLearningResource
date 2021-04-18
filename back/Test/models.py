@@ -50,7 +50,9 @@ class TestQuestions(models.Model):
         null=False,
         default=None,
         verbose_name='QuestionValue',
-        help_text='Amount of points which you can receive for right answer to this question'
+        help_text=
+        'Amount of points which you can receive for '
+        'right answer to this question'
     )
 
     def __str__(self):

@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.shortcuts import get_list_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -34,24 +33,19 @@ class Tasks(ListAPIView):
         task_status = kwargs.get('status')
         if task_type == 'test' and task_status == 'completed':
             task_status = 'evaluated'
-        if task_status == 'quiz' and task_status == 'evaluated':
+        if task_type == 'quiz' and task_status == 'evaluated':
             task_status = 'completed'
 
         result_data = []
         if task_type == "quiz":
-            completed_quizzes = QuizUserAnswer.objects.filter(answer_owner=request.user.id).all()
+            completed_quizzes = QuizUserAnswer.objects.filter(
+                answer_owner=request.user.id)
             if task_status == "set":
                 completed_quizzes_id_list = []
                 for completed_quiz in completed_quizzes:
                     completed_quizzes_id_list.append(completed_quiz.quiz_id)
-                try:
-                    all_quizzes_list = Quiz.objects.all()
-                except AttributeError:
-                    return Response(data={
-                        'message': "There are no such tasks"
-                    },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+
+                all_quizzes_list = get_list_or_404(klass=Quiz)
 
                 set_quizzes = []
                 for quiz in all_quizzes_list:
@@ -88,20 +82,14 @@ class Tasks(ListAPIView):
                     result_data.append(serialization_data.data)
 
         if task_type == 'test':
-            evaluated_tests = TestResult.objects.filter(result_owner=request.user.id).all()
+            evaluated_tests = TestResult.objects.filter(
+                result_owner=request.user.id)
             if task_status == 'set':
                 evaluated_tests_id_list = []
                 for evaluated_test in evaluated_tests:
                     evaluated_tests_id_list.append(evaluated_test.test_id)
 
-                try:
-                    all_tests_list = Test.objects.all()
-                except AttributeError:
-                    return Response(data={
-                        'message': "There are no such tasks"
-                    },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                all_tests_list = get_list_or_404(klass=Test)
 
                 set_tests = []
                 for test in all_tests_list:
@@ -128,7 +116,8 @@ class Tasks(ListAPIView):
                         'task_id': completed_test.test_id,
                         'type': 'test',
                         'status': 'evaluated',
-                        'deadline': Test.objects.filter(id=completed_test.test_id).first().deadline
+                        'deadline': Test.objects.filter(
+                            id=completed_test.test_id).first().deadline
                     }
                     serialization_data = serialization(
                         serializer=self.serializer_class,
@@ -138,26 +127,23 @@ class Tasks(ListAPIView):
                     result_data.append(serialization_data.data)
 
         if task_type == 'homework':
-            completed_homeworks_list = HomeworkAnswer.objects.filter(student=request.user.id).all()
-            evaluated_homeworks_list = HomeworkMark.objects.filter(student=request.user.id).all()
+            completed_homeworks_list = HomeworkAnswer.objects.filter(
+                student=request.user.id)
+            evaluated_homeworks_list = HomeworkMark.objects.filter(
+                student=request.user.id)
             if task_status == 'set':
                 completed_homework_id_list = []
                 evaluated_homework_id_list = []
 
                 for completed_homework in completed_homeworks_list:
-                    completed_homework_id_list.append(completed_homework.homework_id)
+                    completed_homework_id_list.append(
+                        completed_homework.homework_id)
 
                 for evaluated_homework in evaluated_homeworks_list:
-                    evaluated_homework_id_list.append(evaluated_homework.homework_answer_id)
+                    evaluated_homework_id_list.append(
+                        evaluated_homework.homework_answer_id)
 
-                try:
-                    all_homeworks_list = Homework.objects.all()
-                except AttributeError:
-                    return Response(data={
-                        'message': "There are no such tasks"
-                    },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                all_homeworks_list = get_list_or_404(klass=Homework)
 
                 set_homeworks = []
                 for homework in all_homeworks_list:
@@ -170,7 +156,8 @@ class Tasks(ListAPIView):
                         'task_id': set_homework.id,
                         'type': 'homework',
                         'status': 'set',
-                        'deadline': Homework.objects.filter(id=set_homework.id).first().deadline
+                        'deadline': Homework.objects.filter(
+                            id=set_homework.id).first().deadline
                     }
                     serialization_data = serialization(
                         serializer=self.serializer_class,
@@ -183,16 +170,10 @@ class Tasks(ListAPIView):
                 evaluated_homework_id_list = []
 
                 for evaluated_homework in evaluated_homeworks_list:
-                    evaluated_homework_id_list.append(evaluated_homework.homework_answer_id)
+                    evaluated_homework_id_list.append(
+                        evaluated_homework.homework_answer_id)
 
-                try:
-                    all_homeworks_list = HomeworkAnswer.objects.all()
-                except AttributeError:
-                    return Response(data={
-                        'message': "There are no such tasks"
-                    },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                all_homeworks_list = get_list_or_404(klass=HomeworkAnswer)
 
                 completed_homeworks = []
                 for homework in all_homeworks_list:
@@ -204,7 +185,10 @@ class Tasks(ListAPIView):
                         'task_id': completed_homework.homework_id,
                         'type': 'homework',
                         'status': 'completed',
-                        'deadline': Homework.objects.filter(id=completed_homework.homework_id).first().deadline
+                        'deadline':
+                            Homework.objects.filter(
+                                id=completed_homework.homework_id
+                            ).first().deadline
                     }
                     result_data.append(data)
             if task_status == 'evaluated':
@@ -213,7 +197,10 @@ class Tasks(ListAPIView):
                         'task_id': evaluated_homework.homework_id,
                         'type': 'homework',
                         'status': 'evaluated',
-                        'deadline': Homework.objects.filter(id=evaluated_homework.homework_id).first().deadline
+                        'deadline':
+                            Homework.objects.filter(
+                                id=evaluated_homework.homework_id
+                            ).first().deadline
                     }
                     serialization_data = serialization(
                         serializer=self.serializer_class,
@@ -237,10 +224,10 @@ class Stats(ListAPIView):
     def get(self, request, *args, **kwargs):
         tests_trigger = False
         homeworks_trigger = False
-        tests = TestResult.objects.filter(result_owner=request.user.id).all()
+        tests = TestResult.objects.filter(result_owner=request.user.id)
         if tests.count() == 0:
             tests_trigger = True
-        homeworks = HomeworkMark.objects.filter(student=request.user.id).all()
+        homeworks = HomeworkMark.objects.filter(student=request.user.id)
         if homeworks.count() == 0:
             homeworks_trigger = True
 
@@ -261,12 +248,16 @@ class Stats(ListAPIView):
             homeworks_marks_list.append(homework.mark)
 
         if len(tests_marks_list) != 0:
-            self.average_tests_mark = sum(tests_marks_list) / len(tests_marks_list)
+            self.average_tests_mark = \
+                sum(tests_marks_list) / len(tests_marks_list)
 
         if len(homeworks_marks_list) != 0:
-            self.average_homeworks_mark = sum(homeworks_marks_list) / len(homeworks_marks_list)
+            self.average_homeworks_mark = \
+                sum(homeworks_marks_list) / len(homeworks_marks_list)
 
-        average_mark = float((self.average_tests_mark + self.average_homeworks_mark) / 2)
+        average_mark = float(
+            (self.average_tests_mark + self.average_homeworks_mark) / 2
+        )
         data = {
             "average_mark": f'{average_mark}%',
             "average_tests_mark": f'{self.average_tests_mark}%',

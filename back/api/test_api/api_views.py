@@ -3,7 +3,7 @@ from datetime import datetime
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, get_object_or_404
 
 from common.utils import serialization
 from Test.models import (
@@ -67,9 +67,10 @@ class CreateTest(CreateAPIView):
                     'answer': answer,
                     'is_correct': is_correct
                 }
-
                 serialization(
-                    serializer=self.serializer_class.get_serializer(TestQuestionAnswers),
+                    serializer=self.serializer_class.get_serializer(
+                        TestQuestionAnswers
+                    ),
                     data=answer_data,
                     mode='create'
                 )
@@ -88,28 +89,18 @@ class GiveAnswerTest(CreateTest):
     def create(self, request, *args, **kwargs):
         test_id = kwargs.get('id')
 
-        try:
-            Test.objects.get(id=test_id)
-        except Test.DoesNotExist:
+        if get_object_or_404(
+                queryset=Test,
+                id=test_id).deadline < datetime.now():
             return Response(data={
-                "message": "There no such test"},
+                "message":
+                    "You can't answer this test because "
+                    "you didn't meet deadline"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        if Test.objects.get(id=test_id).deadline < datetime.now():
-            return Response(data={
-                "message": "You can't answer this test because you didn't meet deadline"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            TestResult.objects.get(
+        if TestResult.objects.filter(
                 result_owner=request.user.id,
-                test=test_id
-            )
-        except TestResult.DoesNotExist:
-            pass
-        else:
+                test=test_id).exists():
             return Response(data={
                 "message": "You already answered this test"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -129,7 +120,9 @@ class GiveAnswerTest(CreateTest):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             try:
-                TestQuestionAnswers.objects.filter(id=answer_id, question_id=question_id).first().is_correct
+                TestQuestionAnswers.objects.filter(
+                    id=answer_id,
+                    question_id=question_id).first().is_correct
             except AttributeError:
                 return Response(data={
                     "message": "There are no such answer to this question"},

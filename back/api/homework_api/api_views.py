@@ -6,7 +6,7 @@ from django.core.files.storage import default_storage
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, get_object_or_404
 from common.utils import serialization
 
 from TestTaskLearningResource.settings import (
@@ -29,16 +29,11 @@ class GiveAnswerHomework(CreateAPIView):
     def create(self, request, *args, **kwargs):
         homework_id = kwargs.get('id')
 
-        try:
-            homework = Homework.objects.get(id=homework_id)
-        except Homework.DoesNotExist:
-            return Response(
-                data={
-                    "message": "No such homework"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        homework = get_object_or_404(queryset=Homework, id=homework_id)
 
-        if HomeworkAnswer.objects.filter(homework_id=homework_id, student=request.user).exists():
+        if HomeworkAnswer.objects.filter(
+                homework_id=homework_id,
+                student=request.user).exists():
             return Response(
                 data={
                     "message": "You are already answered this homework"},
@@ -72,12 +67,12 @@ class GiveAnswerHomework(CreateAPIView):
         )
 
         if homework.deadline < datetime.now():
-            requests.post(url=AUTO_MARK_HOMEWORK_URL.
-                          format(homework_answer_data_id=homework_answer_data.id),
-                          headers={'Authorization': ADMIN_TOKEN_KEY},
-                          data={'mark': 0.0,
-                                "explanation": "You don't meet a deadline"}
-                          )
+            requests.post(url=AUTO_MARK_HOMEWORK_URL.format(
+                homework_answer_data_id=homework_answer_data.id),
+                headers={'Authorization': ADMIN_TOKEN_KEY},
+                data={'mark': 0.0,
+                      "explanation": "You don't meet a deadline"}
+            )
             return Response(data={
                 'data': "Answer uploaded successfully, "
                         "but you don't meet a deadline that's why, "
@@ -101,22 +96,13 @@ class AssessHomework(CreateAPIView):
         answer_id = kwargs.get('id')
         mark = float(request.data.get('mark'))
         explanation = request.data.get('explanation')
-        try:
-            homework_answer = HomeworkAnswer.objects.get(id=answer_id)
-            student = homework_answer.student_id
-            homework = homework_answer.homework_id
-        except HomeworkAnswer.DoesNotExist:
-            return Response(data={
-                'message': "No such answer"
-            },
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
-        try:
-            HomeworkMark.objects.get(homework_answer_id=answer_id)
-        except HomeworkMark.DoesNotExist:
-            pass
-        else:
+        homework_answer = get_object_or_404(
+            queryset=HomeworkAnswer,
+            id=answer_id
+        )
+
+        if HomeworkMark.objects.filter(homework_answer_id=answer_id).exists():
             return Response(data={
                 'message': "You have already rated this homework"
             },
@@ -124,8 +110,8 @@ class AssessHomework(CreateAPIView):
             )
 
         data = {
-            'student': student,
-            'homework': homework,
+            'student': homework_answer.student_id,
+            'homework': homework_answer.homework_id,
             'homework_answer': answer_id,
             'mark': float(mark / 10 * 100),
             'explanation': explanation

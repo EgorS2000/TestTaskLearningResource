@@ -8,23 +8,23 @@ from Homework.models import (
 class GiveAnswerHomeworkSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeworkAnswer
-        fields = [
+        fields = (
             'student',
             'homework',
             'file'
-        ]
+        )
 
 
 class AssessHomeworkSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeworkMark
-        fields = [
+        fields = (
             'student',
             'homework',
             'homework_answer',
             'mark',
             'explanation'
-        ]
+        )
 
 
 class SummarySerializer(serializers.Serializer):

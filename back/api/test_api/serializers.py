@@ -10,32 +10,32 @@ from Test.models import (
 class CreateTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
-        fields = [
+        fields = (
             'name',
             'deadline',
             'sphere'
-        ]
+        )
 
 
 class CreateTestQuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestQuestions
-        fields = [
+        fields = (
             'test',
             'question',
             'question_value'
-        ]
+        )
 
 
 class CreateTestQuestionsAnswersSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestQuestionAnswers
-        fields = [
+        fields = (
             'test',
             'question',
             'answer',
             'is_correct'
-        ]
+        )
 
 
 class GiveTestAnswerSerializer(serializers.ModelSerializer):
@@ -43,13 +43,13 @@ class GiveTestAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestResult
-        fields = [
+        fields = (
             'test',
             'right_count',
             'wrong_count',
             'mark',
             'result_owner'
-        ]
+        )
 
 
 class SummarySerializer(serializers.Serializer):

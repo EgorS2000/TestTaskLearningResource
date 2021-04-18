@@ -1,8 +1,10 @@
 from django.urls import path
+
 from api.quiz_api.api_views import (
     CreateQuiz,
     GiveQuizAnswer,
 )
+
 
 urlpatterns = [
     path(

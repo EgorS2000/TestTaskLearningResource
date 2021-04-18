@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, get_object_or_404
 
 from common.utils import serialization
 from Quiz.models import (
@@ -64,36 +64,29 @@ class GiveQuizAnswer(CreateAPIView):
         user_answers_list = request.data.get('answers')
         quiz = kwargs.get('id')
 
+        get_object_or_404(queryset=Quiz, id=quiz)
+
+        if QuizUserAnswer.objects.filter(
+                answer_owner=request.user.id,
+                quiz=quiz).exists():
+            return Response(data={
+                "message": "You already answered this quiz"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if len(user_answers_list) == 0:
             return Response(data={
                 "message": "Enter your answers to this quiz"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        try:
-            Quiz.objects.get(id=quiz)
-        except Quiz.DoesNotExist:
-            return Response(data={
-                "message": "There are no such quiz"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            QuizUserAnswer.objects.get(answer_owner=request.user.id, quiz=quiz)
-        except QuizUserAnswer.DoesNotExist:
-            pass
-        else:
-            return Response(data={
-                "message": "You already answered this quiz"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         for user_answer in user_answers_list:
-            try:
-                QuizAnswer.objects.get(quiz=quiz, answer_text=user_answer)
-            except QuizAnswer.DoesNotExist:
+            if not QuizAnswer.objects.filter(
+                    quiz=quiz,
+                    answer_text=user_answer).exists():
                 return Response(data={
-                    "message": f"This quiz has no such answer '{user_answer}'"},
+                    "message":
+                        f"This quiz has no such answer '{user_answer}'"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 

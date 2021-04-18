@@ -9,28 +9,28 @@ from Quiz.models import (
 class CreateQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = [
-            'question'
-        ]
+        fields = (
+            'question',
+        )
 
 
 class CreateQuizAnswersSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizAnswer
-        fields = [
+        fields = (
             'answer_text',
             'quiz'
-        ]
+        )
 
 
 class UserQuizAnswersSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizUserAnswer
-        fields = [
+        fields = (
             'answers',
             'answer_owner',
             'quiz'
-        ]
+        )
 
 
 class SummarySerializer(serializers.Serializer):

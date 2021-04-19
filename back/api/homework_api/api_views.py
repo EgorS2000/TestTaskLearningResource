@@ -1,24 +1,14 @@
 import sys
-from datetime import datetime, date
 
-import requests
-from django.core.files.storage import default_storage
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import CreateAPIView, get_object_or_404
-from common.utils import serialization
+from rest_framework.response import Response
 
-from TestTaskLearningResource.settings import (
-    AUTO_MARK_HOMEWORK_URL,
-    ADMIN_TOKEN_KEY,
-    MAX_FILE_SIZE_IN_BYTES
-)
 from Homework.models import (
-    Homework,
-    HomeworkAnswer,
-    HomeworkMark
+    Homework, HomeworkAnswer,
 )
+from services.homework_services.services import HomeworkService
 from api.homework_api.serializers import SummarySerializer
 
 
@@ -28,58 +18,38 @@ class GiveAnswerHomework(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         homework_id = kwargs.get('id')
-
-        homework = get_object_or_404(queryset=Homework, id=homework_id)
-
-        if HomeworkAnswer.objects.filter(
-                homework_id=homework_id,
-                student=request.user).exists():
-            return Response(
-                data={
-                    "message": "You are already answered this homework"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        user = request.user
 
         file = request.FILES['file']
         file_size = sys.getsizeof(file)
-        if file_size > MAX_FILE_SIZE_IN_BYTES:
-            return Response(
-                data={'message': "File size can't be larger then 2 MB"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
-        file_name = default_storage.save(
-            f'homeworks/{str(date.today().strftime("%d-%m-%Y"))}/'
-            f'{str(datetime.now().strftime("%H-%M-%S"))}/{file.name}',
-            file
+        homework = get_object_or_404(
+            queryset=Homework,
+            id=homework_id
         )
 
-        data = {
-            'student': request.user.id,
-            'homework': homework_id,
-            'file': f'/media/{file_name}'
-        }
+        response = HomeworkService.check_homework_request(
+            homework_id=homework_id,
+            user=user,
+            file_size=file_size
+        )
+        if response:
+            return response
 
-        homework_answer_data = serialization(
-            serializer=self.serializer_class.get_serializer(HomeworkAnswer),
-            data=data,
-            mode='create'
+        homework_answer_data = HomeworkService.user_answer_homework(
+            file=file,
+            user=user,
+            homework_id=homework_id,
+            serializer_class=self.serializer_class
         )
 
-        if homework.deadline < datetime.now():
-            requests.post(url=AUTO_MARK_HOMEWORK_URL.format(
-                homework_answer_data_id=homework_answer_data.id),
-                headers={'Authorization': ADMIN_TOKEN_KEY},
-                data={'mark': 0.0,
-                      "explanation": "You don't meet a deadline"}
-            )
-            return Response(data={
-                'data': "Answer uploaded successfully, "
-                        "but you don't meet a deadline that's why, "
-                        "you automatically get 0"
-            },
-                status=status.HTTP_201_CREATED
-            )
+        response = HomeworkService.check_homework_answer_date(
+            homework=homework,
+            homework_answer_data=homework_answer_data,
+            serializer_class=self.serializer_class
+        )
+        if response:
+            return response
 
         return Response(data={
             'data': 'Answer uploaded successfully'
@@ -102,25 +72,18 @@ class AssessHomework(CreateAPIView):
             id=answer_id
         )
 
-        if HomeworkMark.objects.filter(homework_answer_id=answer_id).exists():
-            return Response(data={
-                'message': "You have already rated this homework"
-            },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        response_1 = HomeworkService.check_user_answer(answer_id=answer_id)
+        if response_1:
+            return response_1
 
-        data = {
-            'student': homework_answer.student_id,
-            'homework': homework_answer.homework_id,
-            'homework_answer': answer_id,
-            'mark': float(mark / 10 * 100),
-            'explanation': explanation
-        }
-        serialization(
-            serializer=self.serializer_class.get_serializer(HomeworkMark),
-            data=data,
-            mode='create'
+        HomeworkService.assess_homework(
+            homework_answer=homework_answer,
+            answer_id=answer_id,
+            mark=mark,
+            explanation=explanation,
+            serializer_class=self.serializer_class
         )
+
         return Response(data={
             'data': "You've successfully rated homework"
         },

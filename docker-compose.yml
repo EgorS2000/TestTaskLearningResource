@@ -20,6 +20,7 @@ services:
       && python /home/back/manage.py migrate
       && python /home/back/manage.py runserver 0.0.0.0:8000"
     env_file:
+      - back/TestTaskLearningResource/.env
       - .env
     ports:
       - "8000:8000"

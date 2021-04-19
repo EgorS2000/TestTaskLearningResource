@@ -13,14 +13,14 @@ from api.homework_api.serializers import SummarySerializer
 
 
 class GiveAnswerHomework(CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
     serializer_class = SummarySerializer
 
     def create(self, request, *args, **kwargs):
         homework_id = kwargs.get('id')
         user = request.user
 
-        file = request.FILES['file']
+        file = request.FILES.get('file')
         file_size = sys.getsizeof(file)
 
         homework = get_object_or_404(
@@ -59,7 +59,7 @@ class GiveAnswerHomework(CreateAPIView):
 
 
 class AssessHomework(CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
     serializer_class = SummarySerializer
 
     def create(self, request, *args, **kwargs):

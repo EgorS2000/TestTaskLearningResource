@@ -4,7 +4,7 @@ from api.test_api.api_views import (
     GiveAnswerTest
 )
 
-urlpatterns = [
+urlpatterns = (
 
     path(
         "tests/create/",
@@ -17,4 +17,4 @@ urlpatterns = [
         GiveAnswerTest.as_view(),
         name='give_answer'
     )
-]
+)

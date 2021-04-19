@@ -14,7 +14,7 @@ from api.info_api.serializers import (
 
 class Tasks(ListAPIView):
     serializer_class = TasksSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         task_type = kwargs.get('type')
@@ -56,7 +56,7 @@ class Tasks(ListAPIView):
 
 
 class Stats(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
     serializer_class = StaticsSerializer
 
     def get(self, request, *args, **kwargs):

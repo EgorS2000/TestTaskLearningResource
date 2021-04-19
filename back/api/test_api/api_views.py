@@ -9,7 +9,7 @@ from api.test_api.serializers import SummarySerializer
 
 class CreateTest(CreateAPIView):
     serializer_class = SummarySerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = (IsAdminUser,)
 
     def create(self, request, *args, **kwargs):
         test_name = request.data.get('name')
@@ -50,7 +50,7 @@ class CreateTest(CreateAPIView):
 
 class GiveAnswerTest(CreateTest):
     serializer_class = SummarySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         test_id = kwargs.get('id')

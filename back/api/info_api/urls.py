@@ -4,7 +4,7 @@ from api.info_api.api_views import (
     Stats
 )
 
-urlpatterns = [
+urlpatterns = (
     path(
         "tasks/<str:type>/<str:status>/",
         Tasks.as_view(),
@@ -15,4 +15,4 @@ urlpatterns = [
         Stats.as_view(),
         name='stats'
     )
-]
+)

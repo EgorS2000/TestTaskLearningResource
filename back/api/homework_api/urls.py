@@ -4,7 +4,7 @@ from api.homework_api.api_views import (
     AssessHomework,
 )
 
-urlpatterns = [
+urlpatterns = (
     path(
         "homeworks/<int:id>/answer/",
         GiveAnswerHomework.as_view(),
@@ -15,4 +15,4 @@ urlpatterns = [
         AssessHomework.as_view(),
         name='mark_answered_homework'
     )
-]
+)

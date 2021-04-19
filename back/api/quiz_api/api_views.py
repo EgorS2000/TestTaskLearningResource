@@ -9,7 +9,7 @@ from services.quiz_services.services import QuizService
 
 class CreateQuiz(CreateAPIView):
     serializer_class = SummarySerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = (IsAdminUser,)
 
     def create(self, request, *args, **kwargs):
         question = request.data.get('question')
@@ -41,7 +41,7 @@ class CreateQuiz(CreateAPIView):
 
 class GiveQuizAnswer(CreateAPIView):
     serializer_class = SummarySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         user_answers_list = request.data.get('answers')

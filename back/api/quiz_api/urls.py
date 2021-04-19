@@ -6,7 +6,7 @@ from api.quiz_api.api_views import (
 )
 
 
-urlpatterns = [
+urlpatterns = (
     path(
         "quizzes/create/",
         CreateQuiz.as_view(),
@@ -18,4 +18,4 @@ urlpatterns = [
         GiveQuizAnswer.as_view(),
         name='give_quiz_answer'
     )
-]
+)

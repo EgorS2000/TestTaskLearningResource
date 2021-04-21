@@ -1,13 +1,12 @@
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.generics import CreateAPIView
+from rest_framework.response import Response
 
-from services.test_services.services import TestService
-from api.test_api.serializers import SummarySerializer
+from Test.serializers import SummarySerializer
+from services.test.services import TestService
 
 
-class CreateTest(CreateAPIView):
+class CreateTest(viewsets.GenericViewSet, mixins.CreateModelMixin):
     serializer_class = SummarySerializer
     permission_classes = (IsAdminUser,)
 
@@ -48,7 +47,7 @@ class CreateTest(CreateAPIView):
         )
 
 
-class GiveAnswerTest(CreateTest):
+class GiveAnswerTest(viewsets.GenericViewSet, mixins.CreateModelMixin):
     serializer_class = SummarySerializer
     permission_classes = (IsAuthenticated,)
 

@@ -15,7 +15,7 @@ class CreateTestTests(APITestCase):
         self.token = Token.objects.create(user=self.user)
         data = {
             "name": "Summary",
-            "deadline": "16/04/2021 23:50:00",
+            "deadline": "21/04/2021 23:50:00",
             "sphere": "IT",
             "questions":
                 {
@@ -33,7 +33,7 @@ class CreateTestTests(APITestCase):
             "questions_value": [5, 5]
         }
         response = self.client.post(
-            reverse('create_test'),
+            reverse('create_test-list'),
             data=data,
             HTTP_AUTHORIZATION=f'Token {self.token}'
         )
@@ -54,7 +54,7 @@ class CreateTestTests(APITestCase):
         }
 
         response = self.client.post(
-            reverse('give_answer'),
+            reverse('give_answer-list'),
             data=data,
             HTTP_AUTHORIZATION=f'Token {self.token}'
         )

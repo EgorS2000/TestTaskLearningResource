@@ -1,8 +1,7 @@
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
-from common.utils import serialization
 from Quiz.models import (
     Quiz,
     QuizAnswer,
@@ -29,13 +28,10 @@ class QuizService:
         quiz_data = {
             'question': question
         }
-        created_quiz = serialization(
-            serializer=serializer_class.get_serializer(Quiz),
-            data=quiz_data,
-            mode='create'
-        )
-
-        return created_quiz
+        serializer = serializer_class.get_serializer(Quiz)
+        serialized_data = serializer(data=quiz_data)
+        if serialized_data.is_valid():
+            return serialized_data.save()
 
     @staticmethod
     def create_answers(answers, created_quiz, serializer_class):
@@ -46,11 +42,11 @@ class QuizService:
                 'answer_text': answer,
                 'quiz': Quiz.objects.filter(id=created_quiz.id).first().id
             }
-            serialization(
-                serializer=serializer_class.get_serializer(QuizAnswer),
-                data=answers_data,
-                mode='create'
-            )
+
+            serializer = serializer_class.get_serializer(QuizAnswer)
+            serialized_data = serializer(data=answers_data)
+            if serialized_data.is_valid():
+                serialized_data.save()
 
     @staticmethod
     def check_answer_request(quiz, user_id, user_answers_list):
@@ -82,14 +78,13 @@ class QuizService:
 
     @staticmethod
     def create_user_answer(quiz, user_id, user_answers_list, serializer_class):
-        data = {
+        user_answer_data = {
             "answers": list(user_answers_list),
             "answer_owner": user_id,
             "quiz": quiz
         }
 
-        serialization(
-            serializer=serializer_class.get_serializer(QuizUserAnswer),
-            data=data,
-            mode='create'
-        )
+        serializer = serializer_class.get_serializer(QuizUserAnswer)
+        serialized_data = serializer(data=user_answer_data)
+        if serialized_data.is_valid():
+            serialized_data.save()

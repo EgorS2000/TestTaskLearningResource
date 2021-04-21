@@ -1,18 +1,18 @@
 import sys
 
-from rest_framework import status
+from rest_framework import status, viewsets, mixins
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import CreateAPIView, get_object_or_404
 from rest_framework.response import Response
 
 from Homework.models import (
     Homework, HomeworkAnswer,
 )
-from services.homework_services.services import HomeworkService
-from api.homework_api.serializers import SummarySerializer
+from Homework.serializers import SummarySerializer
+from services.homework.services import HomeworkService
 
 
-class GiveAnswerHomework(CreateAPIView):
+class GiveAnswerHomework(viewsets.GenericViewSet, mixins.CreateModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = SummarySerializer
 
@@ -58,7 +58,7 @@ class GiveAnswerHomework(CreateAPIView):
         )
 
 
-class AssessHomework(CreateAPIView):
+class AssessHomework(viewsets.GenericViewSet, mixins.CreateModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = SummarySerializer
 

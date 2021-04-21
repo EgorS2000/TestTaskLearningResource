@@ -2,7 +2,11 @@ from django.shortcuts import get_list_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
-from common.utils import serialization
+from Homework.models import (
+    Homework,
+    HomeworkAnswer,
+    HomeworkMark
+)
 from Quiz.models import (
     Quiz,
     QuizUserAnswer
@@ -10,11 +14,6 @@ from Quiz.models import (
 from Test.models import (
     Test,
     TestResult
-)
-from Homework.models import (
-    Homework,
-    HomeworkAnswer,
-    HomeworkMark
 )
 
 
@@ -51,12 +50,11 @@ class InfoService:
                     'status': 'set',
                     'deadline': None
                 }
-                serialization_data = serialization(
-                    serializer=serializer_class,
-                    data=data,
-                    mode='get'
-                )
-                result_data.append(serialization_data.data)
+
+                serializer = serializer_class
+                serialized_data = serializer(data=data)
+                if serialized_data.is_valid():
+                    result_data.append(serialized_data.data)
 
         if task_status == 'completed':
             for completed_quiz in completed_quizzes:
@@ -66,12 +64,12 @@ class InfoService:
                     'status': 'completed',
                     'deadline': None
                 }
-                serialization_data = serialization(
-                    serializer=serializer_class,
-                    data=data,
-                    mode='get'
-                )
-                result_data.append(serialization_data.data)
+
+                serializer = serializer_class
+                serialized_data = serializer(data=data)
+                if serialized_data.is_valid():
+                    result_data.append(serialized_data.data)
+
         return result_data
 
     @staticmethod
@@ -98,12 +96,10 @@ class InfoService:
                     'status': 'set',
                     'deadline': None
                 }
-                serialization_data = serialization(
-                    serializer=serializer_class,
-                    data=data,
-                    mode='get'
-                )
-                result_data.append(serialization_data.data)
+                serializer = serializer_class
+                serialized_data = serializer(data=data)
+                if serialized_data.is_valid():
+                    result_data.append(serialized_data.data)
 
         if task_status == 'evaluated':
             for completed_test in evaluated_tests:
@@ -114,12 +110,12 @@ class InfoService:
                     'deadline': Test.objects.filter(
                         id=completed_test.test_id).first().deadline
                 }
-                serialization_data = serialization(
-                    serializer=serializer_class,
-                    data=data,
-                    mode='get'
-                )
-                result_data.append(serialization_data.data)
+
+                serializer = serializer_class
+                serialized_data = serializer(data=data)
+                if serialized_data.is_valid():
+                    result_data.append(serialized_data.data)
+
         return result_data
 
     @staticmethod
@@ -157,12 +153,11 @@ class InfoService:
                     'deadline': Homework.objects.filter(
                         id=set_homework.id).first().deadline
                 }
-                serialization_data = serialization(
-                    serializer=serializer_class,
-                    data=data,
-                    mode='get'
-                )
-                result_data.append(serialization_data.data)
+
+                serializer = serializer_class
+                serialized_data = serializer(data=data)
+                if serialized_data.is_valid():
+                    result_data.append(serialized_data.data)
 
         if task_status == 'completed':
             evaluated_homework_id_list = []
@@ -200,12 +195,10 @@ class InfoService:
                             id=evaluated_homework.homework_id
                         ).first().deadline
                 }
-                serialization_data = serialization(
-                    serializer=serializer_class,
-                    data=data,
-                    mode='get'
-                )
-                result_data.append(serialization_data.data)
+                serializer = serializer_class
+                serialized_data = serializer(data=data)
+                if serialized_data.is_valid():
+                    result_data.append(serialized_data.data)
         return result_data
 
     @staticmethod
@@ -253,9 +246,7 @@ class InfoService:
             "average_tests_mark": f'{average_tests_mark}%',
             "average_homeworks_mark": f'{average_homeworks_mark}%'
         }
-        serialized_data = serialization(
-            serializer=serializer_class,
-            data=data,
-            mode='get'
-        )
-        return serialized_data
+        serializer = serializer_class
+        serialized_data = serializer(data=data)
+        if serialized_data.is_valid():
+            return serialized_data

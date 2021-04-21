@@ -1,22 +1,21 @@
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 
-from Test.models import TestResult
 from Homework.models import HomeworkMark
-from services.info_services.services import InfoService
-from api.info_api.serializers import (
+from Test.models import TestResult
+from Info.serializers import (
     TasksSerializer,
     StaticsSerializer
 )
+from services.info.services import InfoService
 
 
-class Tasks(ListAPIView):
+class Tasks(viewsets.GenericViewSet, mixins.ListModelMixin):
     serializer_class = TasksSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         task_type = kwargs.get('type')
         task_status = kwargs.get('status')
         user_id = request.user.id
@@ -55,11 +54,11 @@ class Tasks(ListAPIView):
         )
 
 
-class Stats(ListAPIView):
+class Stats(viewsets.GenericViewSet, mixins.ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = StaticsSerializer
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         user_id = request.user.id
 
         tests = TestResult.objects.filter(result_owner=user_id)

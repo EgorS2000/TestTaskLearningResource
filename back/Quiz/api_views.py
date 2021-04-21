@@ -1,13 +1,12 @@
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.generics import CreateAPIView, get_object_or_404
+from rest_framework.response import Response
 
-from api.quiz_api.serializers import SummarySerializer
-from services.quiz_services.services import QuizService
+from Quiz.serializers import SummarySerializer
+from services.quiz.services import QuizService
 
 
-class CreateQuiz(CreateAPIView):
+class CreateQuiz(viewsets.GenericViewSet, mixins.CreateModelMixin):
     serializer_class = SummarySerializer
     permission_classes = (IsAdminUser,)
 
@@ -39,7 +38,7 @@ class CreateQuiz(CreateAPIView):
         )
 
 
-class GiveQuizAnswer(CreateAPIView):
+class GiveQuizAnswer(viewsets.GenericViewSet, mixins.CreateModelMixin):
     serializer_class = SummarySerializer
     permission_classes = (IsAuthenticated,)
 

@@ -4,7 +4,6 @@ from datetime import datetime, date
 from django.core.files.storage import default_storage
 from rest_framework import status
 from rest_framework.response import Response
-from common.utils import serialization
 
 from Homework.models import (
     HomeworkAnswer,
@@ -38,34 +37,30 @@ class HomeworkService:
             file
         )
 
-        data = {
+        user_answer_data = {
             'student': user.id,
             'homework': homework_id,
             'file': f'/media/{file_name}'
         }
 
-        homework_answer_data = serialization(
-            serializer=serializer_class.get_serializer(HomeworkAnswer),
-            data=data,
-            mode='create'
-        )
-
-        return homework_answer_data
+        serializer = serializer_class.get_serializer(HomeworkAnswer)
+        serialized_data = serializer(data=user_answer_data)
+        if serialized_data.is_valid():
+            return serialized_data.save()
 
     @staticmethod
     def assess_homework(homework_answer, answer_id, mark, explanation, serializer_class):
-        data = {
+        assess_data = {
             'student': homework_answer.student_id,
             'homework': homework_answer.homework_id,
             'homework_answer': answer_id,
             'mark': float(mark / 10 * 100),
             'explanation': explanation
         }
-        serialization(
-            serializer=serializer_class.get_serializer(HomeworkMark),
-            data=data,
-            mode='create'
-        )
+        serializer = serializer_class.get_serializer(HomeworkMark)
+        serialized_data = serializer(data=assess_data)
+        if serialized_data.is_valid():
+            serialized_data.save()
 
     @classmethod
     def check_homework_answer_date(cls, homework, homework_answer_data, serializer_class):

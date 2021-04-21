@@ -1,10 +1,9 @@
 from datetime import datetime
 
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
-from common.utils import serialization
 from Test.models import (
     Test,
     TestQuestions,
@@ -24,17 +23,17 @@ class TestService:
 
     @staticmethod
     def create_test(test_name, deadline, date_format, sphere, serializer_class):
-        data = {
+        test_data = {
             'name': test_name,
             'deadline': datetime.strptime(deadline, date_format),
             'sphere': sphere
         }
-        created_test = serialization(
-            serializer=serializer_class.get_serializer(Test),
-            data=data,
-            mode='create'
-        )
-        return created_test
+
+        serializer = serializer_class.get_serializer(Test)
+        serialized_data = serializer(data=test_data)
+        if serialized_data.is_valid():
+            saved_data = serialized_data.save()
+            return saved_data
 
     @staticmethod
     def create_answers(answers, test_id, created_question, serializer_class):
@@ -46,13 +45,10 @@ class TestService:
                 'answer': answer,
                 'is_correct': is_correct
             }
-            serialization(
-                serializer=serializer_class.get_serializer(
-                    TestQuestionAnswers
-                ),
-                data=answer_data,
-                mode='create'
-            )
+            serializer = serializer_class.get_serializer(TestQuestionAnswers)
+            serialized_data = serializer(data=answer_data)
+            if serialized_data.is_valid():
+                serialized_data.save()
 
     @classmethod
     def create_questions(cls, questions, created_test, questions_value, serializer_class):
@@ -64,15 +60,18 @@ class TestService:
                 'question': question,
                 'question_value': questions_value[counter]
             }
-            created_question = serialization(
-                serializer=serializer_class.get_serializer(TestQuestions),
-                data=question_data,
-                mode='create'
-            )
+
+            serializer = serializer_class.get_serializer(TestQuestions)
+            serialized_data = serializer(data=question_data)
+            saved_data = None
+
+            if serialized_data.is_valid():
+                saved_data = serialized_data.save()
+
             cls.create_answers(
                 answers=answers,
                 test_id=test_id,
-                created_question=created_question,
+                created_question=saved_data,
                 serializer_class=serializer_class
             )
             counter += 1
@@ -108,11 +107,9 @@ class TestService:
                     "message": "There are no such question"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            try:
-                TestQuestionAnswers.objects.filter(
+            if not TestQuestionAnswers.objects.filter(
                     id=answer_id,
-                    question_id=question_id).first().is_correct
-            except AttributeError:
+                    question_id=question_id).exists():
                 return Response(data={
                     "message": "There are no such answer to this question"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -133,7 +130,7 @@ class TestService:
             else:
                 wrong_count += 1
 
-        data = {
+        user_answer_data = {
             'test': test_id,
             'right_count': right_count,
             'wrong_count': wrong_count,
@@ -141,10 +138,9 @@ class TestService:
             'result_owner': user_id
         }
 
-        serialization(
-            serializer=serializer_class.get_serializer(TestResult),
-            data=data,
-            mode='create'
-        )
+        serializer = serializer_class.get_serializer(TestResult)
+        serialized_data = serializer(data=user_answer_data)
+        if serialized_data.is_valid():
+            serialized_data.save()
 
-        return data
+        return user_answer_data

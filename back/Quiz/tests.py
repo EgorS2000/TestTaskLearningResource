@@ -23,7 +23,7 @@ class CreateQuizTests(APITestCase):
         }
 
         response = self.client.post(
-            reverse('create_quiz'),
+            reverse('create_quiz-list'),
             data=data,
             HTTP_AUTHORIZATION=f'Token {self.token}'
         )
@@ -44,7 +44,7 @@ class CreateQuizTests(APITestCase):
         }
 
         response = self.client.post(
-            reverse('give_quiz_answer'),
+            reverse('quiz_answer-list'),
             data=data,
             HTTP_AUTHORIZATION=f'Token {self.token}'
         )

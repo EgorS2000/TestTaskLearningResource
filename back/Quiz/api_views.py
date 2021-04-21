@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from Quiz.serializers import SummarySerializer
-from services.quiz.services import QuizService
+from Quiz.services import QuizService
 
 
 class CreateQuiz(viewsets.GenericViewSet, mixins.CreateModelMixin):

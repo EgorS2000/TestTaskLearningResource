@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from Test.serializers import SummarySerializer
-from services.test.services import TestService
+from Test.services import TestService
 
 
 class CreateTest(viewsets.GenericViewSet, mixins.CreateModelMixin):

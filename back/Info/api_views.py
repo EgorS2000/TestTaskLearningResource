@@ -8,7 +8,7 @@ from Info.serializers import (
     TasksSerializer,
     StaticsSerializer
 )
-from services.info.services import InfoService
+from Info.services import InfoService
 
 
 class Tasks(viewsets.GenericViewSet, mixins.ListModelMixin):

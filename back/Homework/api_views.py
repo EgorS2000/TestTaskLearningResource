@@ -9,7 +9,7 @@ from Homework.models import (
     Homework, HomeworkAnswer,
 )
 from Homework.serializers import SummarySerializer
-from services.homework.services import HomeworkService
+from Homework.services import HomeworkService
 
 
 class GiveAnswerHomework(viewsets.GenericViewSet, mixins.CreateModelMixin):
